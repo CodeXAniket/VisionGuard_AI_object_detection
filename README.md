@@ -103,6 +103,8 @@ visionguard-ai/
 │   ├── tests/                 pytest tests
 │   └── requirements.txt
 ├── docs/DESIGN.md             design decisions & interview Q&A
+├── legacy/                    the original single-file YOLO webcam prototype
+├── start-dev.ps1              starts all three services on Windows
 ├── .env.example
 └── README.md
 ```
@@ -120,7 +122,7 @@ visionguard-ai/
 ### 1. Clone and configure
 
 ```bash
-git clone <your-repo-url> visionguard-ai
+git clone https://github.com/CodeXAniket/VisionGuard_AI_object_detection.git visionguard-ai
 cd visionguard-ai
 cp backend/.env.example backend/.env
 cp vision/.env.example vision/.env
@@ -308,19 +310,9 @@ Live Monitoring page → Start Monitoring
 
 **Duplicate prevention:** `vision/event_handler.py` remembers when it last created an event for each class, per user. A detection only becomes an event if the cooldown (default 30 s, configurable 5–3600 s) has passed since the last event for that class. Frames that don't produce events are never stored or uploaded.
 
-## Screenshots
+## UI
 
-> _Add screenshots here after running the app locally._
-
-| Live Camera | Detection Log (Table) |
-|---|---|
-| `docs/screenshots/live-camera.png` | `docs/screenshots/log-table.png` |
-
-| Detection Log (Insight) | Event Details |
-|---|---|
-| `docs/screenshots/log-insight.png` | `docs/screenshots/event-details.png` |
-
-The visual style (manila folder tabs, graph-paper sheets, sticky notes, highlighter labels) was inspired by the "Feather Room" workspace design.
+The app is a single "folder" with three tabs (Live Camera, Detection Log, Event Details); switching tabs slides the next graph-paper sheet in. The visual style (manila folder tabs, graph-paper sheets, sticky notes, highlighter labels) was inspired by the "Feather Room" workspace design.
 
 ## Future Improvements
 
