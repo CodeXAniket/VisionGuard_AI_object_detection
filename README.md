@@ -44,12 +44,11 @@ VisionGuard AI turns a normal webcam into a monitoring camera. You pick the obje
 ## Features
 
 - **Authentication**: register/login with bcrypt-hashed passwords and JWT-protected APIs
-- **Folder-style workspace UI**: the app is one manila folder with three tabs; switching tabs slides the new graph-paper sheet in from the side
+- **Folder-style workspace UI**: the app is one manila folder with two tabs; switching tabs slides the new graph-paper sheet in from the side
   - **Live Camera** (first tab): browser webcam feed with real-time bounding boxes, class names and confidence scores; objects in frame; recent events on a sticky note
-  - **Detection Log**: *Table* view (history with thumbnails, filters by object, date and minimum confidence, pagination) and *Insight* view (status breakdown, detections today, object "stamps", generated summary)
-  - **Event Details**: the event as a "detection ticket" with the snapshot and its bounding box redrawn, an event log, status (`new` / `reviewed` / `dismissed`), delete
+  - **Detection Log**: *Table* view (history with snapshot thumbnails, full-size snapshot on "View", status (`new` / `reviewed` / `dismissed`) and delete per row, filters by object, date and minimum confidence, pagination) and *Insight* view (status breakdown, detections today, object "stamps", generated summary)
 - **Object selection**: choose any of the 80 COCO classes to monitor
-- **Configurable confidence threshold** and **event cooldown** (saved per user)
+- **Configurable confidence threshold** and **event cooldown**, saved per user automatically as you change them, so they apply to the running monitor immediately
 - **Duplicate suppression**: per-class cooldown so a person standing in view creates one event, not hundreds
 - **Snapshots to S3**: only the frame that triggered an event is uploaded; the bucket stays private and images are served through presigned URLs
 - **Standalone local monitor**: `local_monitor.py` runs YOLO on a local camera in an OpenCV window and can post events to the same API
@@ -75,7 +74,7 @@ visionguard-ai/
 │   └── src/
 │       ├── components/        Folder (tabs + slide animation), Layout, DetectionOverlay, ObjectSelector,
 │       │                      DetectionTable, LogInsight, EventList (sticky note), SummaryNote, ...
-│       ├── pages/             Login, Register, LiveMonitoring (/camera), DetectionHistory (/log), DetectionDetails (/event/:id)
+│       ├── pages/             Login, Register, LiveMonitoring (/camera), DetectionHistory (/log)
 │       ├── services/          apiClient (Axios + JWT), auth/detection/monitoring/dashboard services
 │       ├── hooks/             useCamera, useDetectionLoop, useApi
 │       ├── context/           AuthContext, MonitoringContext
@@ -305,14 +304,14 @@ Live Monitoring page → Start Monitoring
           ← detections (for boxes) + events
           → if events: upload THIS frame to S3 → save metadata in MongoDB
         ← response → React draws boxes; new events appear in "Recent events"
-  → Detection History / Details read from MongoDB + presigned S3 URLs
+  → Detection Log reads from MongoDB + presigned S3 URLs
 ```
 
 **Duplicate prevention:** `vision/event_handler.py` remembers when it last created an event for each class, per user. A detection only becomes an event if the cooldown (default 30 s, configurable 5–3600 s) has passed since the last event for that class. Frames that don't produce events are never stored or uploaded.
 
 ## UI
 
-The app is a single "folder" with three tabs (Live Camera, Detection Log, Event Details); switching tabs slides the next graph-paper sheet in. The visual style (manila folder tabs, graph-paper sheets, sticky notes, highlighter labels) was inspired by the "Feather Room" workspace design.
+The app is a single "folder" with two tabs (Live Camera, Detection Log); switching tabs slides the next graph-paper sheet in. The visual style (manila folder tabs, graph-paper sheets, sticky notes, highlighter labels) was inspired by the "Feather Room" workspace design.
 
 ## Future Improvements
 

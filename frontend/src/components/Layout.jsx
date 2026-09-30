@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react';
-import { matchPath, Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import AppHeader from './AppHeader';
 import Folder from './Folder';
 import { useAuth } from '../context/AuthContext';
@@ -28,29 +27,21 @@ function UserSlip() {
   );
 }
 
+const TABS = [
+  { key: 'camera', to: '/camera', label: ['Live', 'Camera'] },
+  { key: 'log', to: '/log', label: ['Detection', 'Log'] },
+];
+
 export default function Layout() {
   const location = useLocation();
-  // The "Event Details" tab re-opens the last event you looked at.
-  const [lastEventId, setLastEventId] = useState(null);
-  const openEventId = matchPath('/event/:id', location.pathname)?.params.id;
-
-  useEffect(() => {
-    if (openEventId) setLastEventId(openEventId);
-  }, [openEventId]);
-
-  const tabs = [
-    { key: 'camera', to: '/camera', label: ['Live', 'Camera'] },
-    { key: 'log', to: '/log', label: ['Detection', 'Log'] },
-    { key: 'event', to: lastEventId ? `/event/${lastEventId}` : '/event', label: ['Event', 'Details'] },
-  ];
-  const activeKey = tabs.find((tab) => location.pathname.startsWith(`/${tab.key}`))?.key ?? 'camera';
+  const activeKey = TABS.find((tab) => location.pathname.startsWith(`/${tab.key}`))?.key ?? 'camera';
 
   return (
     <div className="min-h-screen">
       <AppHeader right={<UserSlip />} />
       <main className="px-3 pb-16 pt-4 md:px-6 md:pt-10">
-        <Folder tabs={tabs} activeKey={activeKey}>
-          <Outlet context={{ forgetEvent: () => setLastEventId(null) }} />
+        <Folder tabs={TABS} activeKey={activeKey}>
+          <Outlet />
         </Folder>
       </main>
     </div>

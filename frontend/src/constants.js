@@ -11,6 +11,13 @@ export const MAX_FRAME_WIDTH = 640;
 
 export const DETECTION_STATUSES = ['new', 'reviewed', 'dismissed'];
 
+// Text colour for each event status (tracker-style coloured status column).
+export const STATUS_COLORS = {
+  new: 'text-accent-blue',
+  reviewed: 'text-accent-green',
+  dismissed: 'text-accent-olive',
+};
+
 // Shown first in the object selector - the most useful classes for monitoring.
 export const COMMON_CLASSES = ['person', 'car', 'dog', 'cat', 'cell phone', 'backpack', 'laptop', 'bottle'];
 

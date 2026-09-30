@@ -6,7 +6,6 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import LiveMonitoring from './pages/LiveMonitoring';
 import DetectionHistory from './pages/DetectionHistory';
-import DetectionDetails, { EventPlaceholder } from './pages/DetectionDetails';
 
 function NotFound() {
   return (
@@ -19,7 +18,7 @@ function NotFound() {
   );
 }
 
-// Folder tabs: Live Camera (first page) · Detection Log · Event Details
+// Folder tabs: Live Camera (first page) · Detection Log
 export default function App() {
   return (
     <Routes>
@@ -38,8 +37,6 @@ export default function App() {
         <Route index element={<Navigate to="/camera" replace />} />
         <Route path="camera" element={<LiveMonitoring />} />
         <Route path="log" element={<DetectionHistory />} />
-        <Route path="event" element={<EventPlaceholder />} />
-        <Route path="event/:id" element={<DetectionDetails />} />
       </Route>
 
       <Route path="*" element={<NotFound />} />

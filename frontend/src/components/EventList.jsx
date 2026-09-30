@@ -21,7 +21,7 @@ export default function EventList({ events = [], emptyMessage = 'No detection ev
       <ul>
         {events.map((event) => (
           <li key={event.id} className="rise-in border-b border-ink/10 last:border-b-0">
-            <Link to={`/event/${event.id}`} className="flex items-center gap-3 px-3 py-2.5 hover:bg-ink/5">
+            <Link to="/log" className="flex items-center gap-3 px-3 py-2.5 hover:bg-ink/5">
               <DateBlock value={event.timestamp} />
               <div className="min-w-0 flex-1 text-[12px] leading-snug">
                 <p className="truncate text-ink">
