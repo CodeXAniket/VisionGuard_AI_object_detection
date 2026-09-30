@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import DetectionOverlay from '../components/DetectionOverlay';
 import ObjectSelector from '../components/ObjectSelector';
 import EventList from '../components/EventList';
@@ -23,6 +23,17 @@ function pickEditable(config) {
   };
 }
 
+const AUTOSAVE_DELAY_MS = 600;
+
+// Returns an error message, or null when the draft can be saved.
+function validateDraft(draft) {
+  const { cooldownSeconds } = draft;
+  if (!Number.isInteger(cooldownSeconds) || cooldownSeconds < 5 || cooldownSeconds > 3600) {
+    return 'Cooldown must be a whole number between 5 and 3600 seconds.';
+  }
+  return null;
+}
+
 function visionPill(health) {
   if (!health) return { text: 'Vision · checking', dot: 'bg-rule' };
   const vision = health.visionService;
@@ -41,9 +52,10 @@ export default function LiveMonitoring() {
   const [settingsError, setSettingsError] = useState(null);
   const [showAllObjects, setShowAllObjects] = useState(true);
 
-  // Start editing from the saved config once it arrives (and after each save).
+  // Start editing from the saved config once it arrives. Only the first time:
+  // later saves must not overwrite anything typed while a save was in flight.
   useEffect(() => {
-    if (configRequest.data) setDraft(pickEditable(configRequest.data));
+    if (configRequest.data) setDraft((current) => current ?? pickEditable(configRequest.data));
   }, [configRequest.data]);
 
   // Show the shared camera stream in this page's <video>. A callback ref runs
@@ -60,26 +72,54 @@ export default function LiveMonitoring() {
   const savedConfig = configRequest.data;
   const isDirty = Boolean(draft && savedConfig) && JSON.stringify(draft) !== JSON.stringify(pickEditable(savedConfig));
 
-  async function saveSettings() {
-    setIsSaving(true);
-    setSettingsError(null);
-    try {
-      configRequest.setData(await updateConfig(draft));
-      return true;
-    } catch (error) {
-      setSettingsError(getErrorMessage(error));
-      return false;
-    } finally {
-      setIsSaving(false);
+  const saveSettings = useCallback(
+    async (config) => {
+      setIsSaving(true);
+      setSettingsError(null);
+      try {
+        configRequest.setData(await updateConfig(config));
+        return true;
+      } catch (error) {
+        setSettingsError(getErrorMessage(error));
+        return false;
+      } finally {
+        setIsSaving(false);
+      }
+    },
+    [configRequest.setData]
+  );
+
+  // Auto-save: settings apply to the running monitor as soon as they are
+  // saved (the backend reads them for every frame), so save shortly after
+  // each change instead of waiting for a "Save" click that is easy to miss.
+  useEffect(() => {
+    if (!isDirty) return undefined;
+    const problem = validateDraft(draft);
+    if (problem) {
+      setSettingsError(problem);
+      return undefined;
     }
-  }
+    setSettingsError(null);
+    const timer = setTimeout(() => saveSettings(draft), AUTOSAVE_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [draft, isDirty, saveSettings]);
+
+  // If the user leaves the page before the auto-save fires, save right away.
+  const pendingDraft = useRef(null);
+  pendingDraft.current = isDirty && !validateDraft(draft) ? draft : null;
+  useEffect(
+    () => () => {
+      if (pendingDraft.current) updateConfig(pendingDraft.current).catch(() => {});
+    },
+    []
+  );
 
   async function handleStart() {
     if (draft.targetClasses.length === 0) {
       setSettingsError('Select at least one object to monitor.');
       return;
     }
-    if (isDirty && !(await saveSettings())) return;
+    if (isDirty && !(await saveSettings(draft))) return;
     await monitoring.startMonitoring();
     health.reload();
   }
@@ -236,11 +276,9 @@ export default function LiveMonitoring() {
                 />
               </div>
               <ErrorAlert message={settingsError} />
-              {isDirty && (
-                <button type="button" className="pill rise-in" onClick={saveSettings} disabled={isSaving}>
-                  {isSaving ? 'Saving…' : 'Save settings'}
-                </button>
-              )}
+              <p className="font-mono text-[10.5px] text-muted" aria-live="polite">
+                {isSaving ? 'Saving…' : isDirty ? 'Unsaved changes' : '✓ Settings saved'}
+              </p>
             </div>
           </div>
 
