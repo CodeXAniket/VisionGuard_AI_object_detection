@@ -1,0 +1,30 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+dist/
+coverage/
+npm-debug.log*
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# YOLO weights (downloaded automatically on first run)
+*.pt
+# ...except the weights that came with the original prototype
+!legacy/yolov8n.pt
+vision/runs/
+vision/snapshots/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
