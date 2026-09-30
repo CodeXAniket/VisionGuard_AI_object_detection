@@ -1,0 +1,12 @@
+# Computer vision
+ultralytics>=8.3        # YOLO (pulls in PyTorch; the default Windows/macOS wheel is CPU-only)
+opencv-python>=4.9      # frame decoding, webcam access, drawing
+numpy>=1.26
+
+# HTTP service + local-camera event posting
+flask>=3.0
+requests>=2.31
+python-dotenv>=1.0
+
+# Tests
+pytest>=8.0
