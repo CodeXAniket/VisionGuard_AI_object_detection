@@ -16,7 +16,11 @@ const env = {
   mongoUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/visionguard',
   jwtSecret: required('JWT_SECRET'),
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '1d',
-  clientOrigin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
+  // Comma-separated list, e.g. "http://localhost:5173,https://visionguard.vercel.app"
+  clientOrigins: (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/$/, ''))
+    .filter(Boolean),
 
   visionServiceUrl: process.env.VISION_SERVICE_URL || 'http://127.0.0.1:8000',
   visionApiKey: process.env.VISION_API_KEY || '',

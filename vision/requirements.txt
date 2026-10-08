@@ -5,6 +5,7 @@ numpy>=1.26
 
 # HTTP service + local-camera event posting
 flask>=3.0
+waitress>=3.0           # production WSGI server (used in the Docker image)
 requests>=2.31
 python-dotenv>=1.0
 

@@ -16,7 +16,7 @@ function createApp() {
   const app = express();
 
   app.disable('x-powered-by');
-  app.use(cors({ origin: env.clientOrigin }));
+  app.use(cors({ origin: env.clientOrigins }));
   app.use(express.json({ limit: '100kb' }));
   app.use(requestLogger);
 

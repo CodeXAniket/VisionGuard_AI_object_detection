@@ -110,6 +110,17 @@ describe('general API behaviour', () => {
     assert.equal(response.body.success, false);
   });
 
+  it('allows every configured frontend origin (CORS) and no others', async () => {
+    const local = await request(app).get('/api/health').set('Origin', 'http://localhost:5173');
+    const hosted = await request(app).get('/api/health').set('Origin', 'https://visionguard.example.app');
+    const other = await request(app).get('/api/health').set('Origin', 'https://evil.example.com');
+
+    assert.equal(local.headers['access-control-allow-origin'], 'http://localhost:5173');
+    // Trailing slash and spaces in CLIENT_ORIGIN are tolerated
+    assert.equal(hosted.headers['access-control-allow-origin'], 'https://visionguard.example.app');
+    assert.equal(other.headers['access-control-allow-origin'], undefined);
+  });
+
   it('returns 400 for malformed JSON', async () => {
     const response = await request(app).post('/api/auth/login').set('Content-Type', 'application/json').send('{"email": ');
     assert.equal(response.status, 400);

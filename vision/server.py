@@ -160,10 +160,16 @@ def main() -> None:
     detector.try_load()
 
     app = create_app(detector, EventHandlerRegistry(), settings.api_key)
-    logger.info("Detection service listening on http://%s:%d", settings.host, settings.port)
-    # Flask's built-in server with threads is enough for a single-user demo;
-    # use waitress/gunicorn for anything bigger.
-    app.run(host=settings.host, port=settings.port, threaded=True)
+    logger.info("Detection service listening on http://%s:%d (%s server)", settings.host, settings.port, settings.server)
+
+    if settings.server == "waitress":
+        # Production WSGI server (used in the Docker image).
+        from waitress import serve
+
+        serve(app, host=settings.host, port=settings.port, threads=4)
+    else:
+        # Flask's built-in server is fine for local development.
+        app.run(host=settings.host, port=settings.port, threaded=True)
 
 
 if __name__ == "__main__":
